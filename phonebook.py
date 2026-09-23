@@ -1,3 +1,5 @@
+from typing import Any
+
 def load_file() -> None:
     """Загружает контакты из JSON-файла."""
     print("\nзагружаем контакты из JSON-файла\n")
@@ -61,7 +63,8 @@ def show_menu() -> None:
 
 def main() -> None:
     """Главная точка входа в приложение."""
-    contacts: list[dict[str, Any]] = [] #инициализируем пустой список контактов
+    contacts: list[dict[str, Any]] = [] # инициализируем пустой список контактов
+    is_open = False # установим флаг: файл ещё не открыт
     while True:
         show_menu()
         choice: str = input("Выберите действие: ")
@@ -70,6 +73,7 @@ def main() -> None:
             break
         elif choice == "1":
             load_file()
+            is_open = True # теперь файл "открыт"
         elif choice == "2":
             save_to_file()
         elif choice == "3":
