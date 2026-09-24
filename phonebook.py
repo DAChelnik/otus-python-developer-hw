@@ -1,9 +1,14 @@
+from os import path
 from typing import Any
 
 def load_file() -> None:
     """Загружает контакты из JSON-файла."""
-    print("\nзагружаем контакты из JSON-файла\n")
-    pass  # Позже здесь будет реализация
+    if not path.exists(filepath):
+        print(
+            f"Файл '{filepath}' не найден. "
+            f"Создан пустой справочник."
+        )
+        return []
 
 def save_to_file() -> None:
     """Сохраняет контакты в JSON-файл."""
