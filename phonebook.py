@@ -1,7 +1,8 @@
+import json
 from os import path
 from typing import Any
 
-def load_file() -> None:
+def open_file(filepath: str) -> list[dict[str, Any]]:
     """Загружает контакты из JSON-файла."""
     if not path.exists(filepath):
         print(
@@ -10,10 +11,23 @@ def load_file() -> None:
         )
         return []
 
-def save_to_file() -> None:
+def save_to_file(
+    contacts: list[dict[str, Any]],
+    filepath: str
+) -> None:
     """Сохраняет контакты в JSON-файл."""
-    print("\nсохраняем контакты в JSON-файл\n")
-    pass  # Позже здесь будет реализация
+    try:
+        with open(filepath, "w", encoding="utf-8") as fh:
+            json.dump(
+                contacts,
+                fh,
+                ensure_ascii=False,
+                indent=4,
+            )
+    except OSError as exc:
+        print(f"Ошибка сохранения: {exc}")
+        return
+    print(f"Справочник сохранён в '{filepath}'.")
 
 def show_all(contacts) -> None:
     """Выводит все контакты в консоль."""
@@ -69,6 +83,7 @@ def show_menu() -> None:
 def main() -> None:
     """Главная точка входа в приложение."""
     contacts: list[dict[str, Any]] = [] # инициализируем пустой список контактов
+    filepath = "phonebook.json"
     is_open = False # установим флаг: файл ещё не открыт
     while True:
         show_menu()
@@ -77,10 +92,20 @@ def main() -> None:
             print("До свидания!")
             break
         elif choice == "1":
-            load_file()
+            path = input(
+                f"Путь к файлу [{filepath}]: "
+            ).strip()
+            if path:
+                filepath = path
+            contacts = open_file(filepath)
             is_open = True # теперь файл "открыт"
         elif choice == "2":
-            save_to_file()
+            path = input(
+                f"Путь к файлу [{filepath}]: "
+            ).strip()
+            if path:
+                filepath = path
+            save_to_file(contacts, filepath)
         elif choice == "3":
             show_all(contacts)
         elif choice == "4":

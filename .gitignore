@@ -9,3 +9,5 @@ Desktop.ini
 # Файлы от IDE
 .idea/
 .vscode/
+
+phonebook.json
