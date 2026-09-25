@@ -37,10 +37,28 @@ def show_all(contacts) -> None:
         return
     pass  # Позже здесь будет реализация
 
-def add_contact(contacts) -> None:
+def add_contact(contacts: list[dict[str, Any]]) -> bool:
     """Создаёт новый контакт и добавляет его в список."""
-    print("\nсоздаём новый контакт и добавляет его в список\n")
-    pass  # Позже здесь будет реализация
+    try:
+        print("--- Контактная информация ---")
+        name = input("Имя: ")
+        phone = input("Телефон: ")
+        print("--- Адрес ---")
+        address = input()
+        print("--- Комментарий ---")
+        comment = input("Комментарий: ")
+    except ValueError as exc:
+        print(f"Ошибка: {exc}")
+        return
+
+    contact = {
+        "name": name,
+        "phone": phone,
+        "address": address,
+        "comment": comment,
+    }
+    contacts.append(contact)
+    print(f"Контакт добавлен")
 
 def search_contacts(contacts) -> None:
     """Ищет контакты по полям или по всем полям сразу."""
@@ -116,6 +134,9 @@ def main() -> None:
             edit_contact(contacts)
         elif choice == "7":
             remove_contact(contacts)
+        else:
+            print("\nОшибка: неизвестное действие.")
+            continue
 
 if __name__ == "__main__":
     main()
