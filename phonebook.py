@@ -11,6 +11,13 @@ def open_file(filepath: str) -> list[dict[str, Any]]:
         )
         return []
 
+    try:
+        with open(filepath, "r", encoding="utf-8") as fh:
+            return json.load(fh)
+    except (OSError, json.JSONDecodeError) as exc:
+        print(f"Ошибка чтения: {exc}")
+        return []
+
 def save_to_file(
     contacts: list[dict[str, Any]],
     filepath: str
@@ -29,13 +36,26 @@ def save_to_file(
         return
     print(f"Справочник сохранён в '{filepath}'.")
 
-def show_all(contacts) -> None:
-    """Выводит все контакты в консоль."""
-    print("\nвыводим все контакты в консоль\n")
+def show_all(contacts: list[dict[str, Any]]) -> None:
+    """Выводит все контакты в консоль.
+    """
     if not contacts:
         print("Справочник пуст.")
         return
-    pass  # Позже здесь будет реализация
+
+    for contact in contacts:
+        print_contact(contact)
+
+def print_contact(contact: dict[str, Any]) -> None:
+    """Выводит один контакт в читаемом виде.
+    """
+    print(
+        f"  Имя: {contact.get('name', '')}\n"
+        f"  Телефон: {contact.get('phone', '')}\n"
+        f"  Адрес: {contact.get('address', '')}\n"
+        f"  Комментарий: {contact.get('comment', '')}"
+    )
+    print("-" * 40)
 
 def add_contact(contacts: list[dict[str, Any]]) -> bool:
     """Создаёт новый контакт и добавляет его в список."""
