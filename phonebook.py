@@ -47,8 +47,7 @@ def show_all(contacts: list[dict[str, Any]]) -> None:
         print_contact(contact)
 
 def print_contact(contact: dict[str, Any]) -> None:
-    """Выводит один контакт в читаемом виде.
-    """
+    """Выводит один контакт в читаемом виде."""
     print(
         f"  Имя: {contact.get('name', '')}\n"
         f"  Телефон: {contact.get('phone', '')}\n"
