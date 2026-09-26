@@ -1,13 +1,96 @@
+# Исключения данного проекта
+# --------------------------
+phonebook.json
+
+# Глобальные исключения
+# ---------------------
+
 # Windows
 Thumbs.db
 ehthumbs.db
 Desktop.ini
 
+# Linux
+*~
+
+# AI для OpenIDE
+.kilo/
+.aiforopenide/
+!.aiforopenide/config.json
+
 # Виртуальные окружения
+venv/
+.venv/
+env/
+.env/
+ENV/
+
+# Переменные окружения
 .venv
+.env
+.env.local
+.env.*.local
+!.env.example
+.env.development.local
+.env.test.local
+.env.production.local
 
 # Файлы от IDE
 .idea/
+*.iml
 .vscode/
 
-phonebook.json
+# Байт-код и кэш
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Дистрибутивы и сборка
+dist/
+build/
+*.egg-info/
+*.egg
+
+# Тестирование и покрытие
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# mypy, ruff
+.mypy_cache/
+.ruff_cache/
+
+# PyInstaller
+*.spec
+
+# .gitignore для Node.js
+# ----------------------
+
+# Зависимости
+node_modules/
+.pnp
+.pnp.js
+
+# Артефакты сборки
+.next/
+.nuxt/
+.output/
+
+# Логи
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# Кэш
+.cache/
+.eslintcache
+.stylelintcache
+
+# Тестирование
+coverage/
+
