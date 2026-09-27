@@ -2,6 +2,12 @@ import json
 from os import path
 from typing import Any
 
+def generate_id(contacts: list[dict[str, Any]]) -> int:
+    """Генерирует уникальный ID для нового контакта."""
+    if not contacts:
+        return 1
+    return max(c["id"] for c in contacts) + 1
+
 def open_file(filepath: str) -> list[dict[str, Any]]:
     """Загружает контакты из JSON-файла."""
     if not path.exists(filepath):
@@ -71,6 +77,7 @@ def add_contact(contacts: list[dict[str, Any]]) -> bool:
         return
 
     contact = {
+        "id": generate_id(contacts),
         "name": name,
         "phone": phone,
         "address": address,
