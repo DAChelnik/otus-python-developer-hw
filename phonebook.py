@@ -122,9 +122,57 @@ def main() -> None:
     contacts: list[dict[str, Any]] = [] # инициализируем пустой список контактов
     filepath = "phonebook.json"
     is_open = False # установим флаг: файл ещё не открыт
+
+    actions: dict[str, dict[str, Any]] = {
+        "1": {
+            "label": "Открыть файл",
+            "needs_open": False,
+        },
+        "2": {
+            "label": "Сохранить файл",
+            "needs_open": True,
+        },
+        "3": {
+            "label": "Показать все",
+            "needs_open": True,
+        },
+        "4": {
+            "label": "Создать контакт",
+            "needs_open": True,
+        },
+        "5": {
+            "label": "Найти контакт",
+            "needs_open": True,
+        },
+        "6": {
+            "label": "Изменить контакт",
+            "needs_open": True,
+        },
+        "7": {
+            "label": "Удалить контакт",
+            "needs_open": True,
+        },
+        "0": {
+            "label": "Выход",
+            "needs_open": False,
+        },
+    }
+
+
     while True:
         show_menu()
         choice: str = input("Выберите действие: ")
+
+        if choice not in actions:
+            print("Ошибка: неизвестное действие.")
+            continue
+
+        if actions[choice]["needs_open"] and not is_open:
+            print(
+                "\nСначала откройте или создайте файл (пункт 1)."
+            )
+            continue
+
         if choice == "0":
             print("До свидания!")
             break
