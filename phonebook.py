@@ -2,7 +2,7 @@ import json
 from os import path
 from typing import Any
 
-def generate_id(contacts: list[dict[str, Any]]) -> int:
+def get_next_id(contacts: list[dict[str, Any]]) -> int:
     """Генерирует уникальный ID для нового контакта."""
     if not contacts:
         return 1
@@ -50,9 +50,9 @@ def show_all(contacts: list[dict[str, Any]]) -> None:
         return
 
     for contact in contacts:
-        print_contact(contact)
+        print_one(contact)
 
-def print_contact(contact: dict[str, Any]) -> None:
+def print_one(contact: dict[str, Any]) -> None:
     """Выводит один контакт в читаемом виде."""
     print(
         f"  Имя: {contact.get('name', '')}\n"
@@ -62,7 +62,7 @@ def print_contact(contact: dict[str, Any]) -> None:
     )
     print("-" * 40)
 
-def add_contact(contacts: list[dict[str, Any]]) -> bool:
+def add_contact(contacts: list[dict[str, Any]]) -> None:
     """Создаёт новый контакт и добавляет его в список."""
     try:
         print("--- Контактная информация ---")
@@ -77,7 +77,7 @@ def add_contact(contacts: list[dict[str, Any]]) -> bool:
         return
 
     contact = {
-        "id": generate_id(contacts),
+        "id": get_next_id(contacts),
         "name": name,
         "phone": phone,
         "address": address,
@@ -86,13 +86,81 @@ def add_contact(contacts: list[dict[str, Any]]) -> bool:
     contacts.append(contact)
     print(f"Контакт добавлен")
 
-def search_contacts(contacts) -> None:
+def search_contacts(contacts: list[dict[str, Any]]) -> None:
     """Ищет контакты по полям или по всем полям сразу."""
-    print("\nищем контакты по полям или по всем полям сразу")
     if not contacts:
         print("Справочник пуст.")
         return
-    pass  # Позже здесь будет реализация
+    print(
+        "Поиск по:\n"
+        "  0 — по всем полям\n"
+        "  1 — по имени\n"
+        "  2 — по телефону\n"
+        "  3 — по комментарию"
+    )
+    try:
+        choice = input("Выберите режим: ")
+        mode = int(choice)
+    except (ValueError, TypeError):
+        print("Ошибка: нужно ввести число.")
+        return
+
+    field_map = {
+        0: None,
+        1: ["name"],
+        2: ["phone"],
+        3: ["comment"],
+    }
+    if mode not in field_map:
+        print("Ошибка: неизвестный режим поиска.")
+        return
+
+    search_text = input("Введите поисковый запрос: ").strip()   # <-- добавили
+    if not search_text:
+        print("Ошибка: пустой запрос.")
+        return
+
+    fields = field_map[mode]
+    results = [
+        c for c in contacts
+        if matches_query(c, search_text, fields=fields)          # <-- query → search_text
+    ]
+
+    if not results:
+        print("Ничего не найдено.")
+        return
+
+    for contact in results:
+        print_one(contact)
+
+def matches_query(
+        contact: dict[str, Any],
+        query: str,
+        fields: list[str] | None = None
+) -> bool:
+    """Проверяет, содержит ли контакт поисковый запрос."""
+    query_lower = query.lower()
+
+    if fields is None:
+        searchable = [
+            str(contact.get("name", "")),
+            str(contact.get("phone", "")),
+            str(contact.get("comment", "")),
+        ]
+        addr = contact.get("address", {})
+        if isinstance(addr, dict):
+            searchable.extend(str(v) for v in addr.values())
+        return any(query_lower in s.lower() for s in searchable)
+
+    for field in fields:
+        value = contact.get(field, "")
+        if isinstance(value, dict):
+            for sub_val in value.values():
+                if query_lower in str(sub_val).lower():
+                    return True
+        elif query_lower in str(value).lower():
+            return True
+    return False
 
 def edit_contact(contacts: list[dict[str, Any]]) -> None:
     """Редактирует существующий контакт."""
@@ -172,7 +240,7 @@ def remove_contact(contacts: list[dict[str, Any]]) -> None:
         print(f"Контакт с ID {contact_id} не найден.")
         return
 
-    print_contact(contact)
+    print_one(contact)
     confirm = input(
         "Удалить этот контакт? (y/n): "
     ).lower()
@@ -280,9 +348,6 @@ def main() -> None:
             edit_contact(contacts)
         elif choice == "7":
             remove_contact(contacts)
-        else:
-            print("\nОшибка: неизвестное действие.")
-            continue
 
 if __name__ == "__main__":
     main()
