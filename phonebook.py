@@ -94,21 +94,94 @@ def search_contacts(contacts) -> None:
         return
     pass  # Позже здесь будет реализация
 
-def edit_contact(contacts) -> None:
+def edit_contact(contacts: list[dict[str, Any]]) -> None:
     """Редактирует существующий контакт."""
-    print("\nредактируем существующий контакт")
     if not contacts:
         print("Справочник пуст.")
         return
-    pass  # Позже здесь будет реализация
 
-def remove_contact(contacts) -> None:
+    try:
+        raw_id = input("ID контакта для изменения: ")
+        contact_id = int(raw_id)
+    except (ValueError, TypeError):
+        print("Ошибка: ID должен быть числом.")
+        return
+
+    contact = find_by_id(contacts, contact_id)
+    if contact is None:
+        print(f"Контакт с ID {contact_id} не найден.")
+        return
+
+    print("Оставьте поле пустым, чтобы не менять значение.")
+
+    try:
+        new_name = input(
+            f"Имя [{contact['name']}]: "
+        ).strip()
+        if new_name:
+            contact["name"] = new_name
+
+        new_phone = input(
+            f"Телефон [{contact['phone']}]: "
+        ).strip()
+        if new_phone:
+            contact["phone"] =new_phone
+
+        new_address = input(
+            f"Адрес [{contact['address']}]: "
+        ).strip()
+        if new_address:
+            contact["address"] = new_address
+
+        new_comment = input(
+            f"Комментарий [{contact.get('comment', '')}]: "
+        ).strip()
+        if new_comment:
+            contact["comment"] = new_comment
+    except ValueError as exc:
+        print(f"Ошибка: {exc}")
+        return
+
+    print(f"Контакт ID {contact_id} изменён.")
+
+def find_by_id(
+        contacts: list[dict[str, Any]],
+        contact_id: int
+) -> dict[str, Any] | None:
+    """Ищет контакт по ID."""
+    for contact in contacts:
+        if contact.get("id") == contact_id:
+            return contact
+    return None
+
+def remove_contact(contacts: list[dict[str, Any]]) -> None:
     """Удаляет контакт по ID с подтверждением."""
-    print("удаляем контакт по ID с подтверждением")
     if not contacts:
         print("Справочник пуст.")
         return
-    pass  # Позже здесь будет реализация
+
+    try:
+        raw_id = input("ID контакта для удаления: ")
+        contact_id = int(raw_id)
+    except (ValueError, TypeError):
+        print("Ошибка: ID должен быть числом.")
+        return
+
+    contact = find_by_id(contacts, contact_id)
+    if contact is None:
+        print(f"Контакт с ID {contact_id} не найден.")
+        return
+
+    print_contact(contact)
+    confirm = input(
+        "Удалить этот контакт? (y/n): "
+    ).lower()
+    if confirm != "y":
+        print("Удаление отменено.")
+        return
+
+    contacts.remove(contact)
+    print(f"Контакт ID {contact_id} удалён.")
 
 def show_menu() -> None:
     """Выводит главное меню приложения."""
@@ -164,7 +237,6 @@ def main() -> None:
             "needs_open": False,
         },
     }
-
 
     while True:
         show_menu()
