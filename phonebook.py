@@ -22,7 +22,7 @@ def get_next_id(contacts: list[dict[str, Any]]) -> int:
     return max(c["id"] for c in contacts) + 1
 
 
-def open_file(filepath: str) -> list[dict[str, Any]]:
+def load_file(filepath: str) -> list[dict[str, Any]]:
     """Загружает контакты из JSON-файла."""
     if not path.exists(filepath):
         print(f"Файл '{filepath}' не найден. " f"Создан пустой справочник.")
@@ -113,7 +113,7 @@ def search_contacts(contacts: list[dict[str, Any]]) -> None:
     try:
         choice = input("Выберите режим: ")
         mode = int(choice)
-    except (ValueError, TypeError):
+    except ValueError, TypeError:
         print("Ошибка: нужно ввести число.")
         return
 
@@ -184,7 +184,7 @@ def edit_contact(contacts: list[dict[str, Any]]) -> None:
     try:
         raw_id = input("ID контакта для изменения: ")
         contact_id = int(raw_id)
-    except (ValueError, TypeError):
+    except ValueError, TypeError:
         print("Ошибка: ID должен быть числом.")
         return
 
@@ -237,7 +237,7 @@ def remove_contact(contacts: list[dict[str, Any]]) -> None:
     try:
         raw_id = input("ID контакта для удаления: ")
         contact_id = int(raw_id)
-    except (ValueError, TypeError):
+    except ValueError, TypeError:
         print("Ошибка: ID должен быть числом.")
         return
 
@@ -276,6 +276,7 @@ def main() -> None:
     contacts: list[dict[str, Any]] = []  # инициализируем пустой список контактов
     filepath = "phonebook.json"
     is_open = False  # установим флаг: файл ещё не открыт
+    has_changes = False  # отслеживает, были ли изменения после последнего сохранения
 
     actions: dict[str, dict[str, Any]] = {
         "1": {
@@ -321,33 +322,43 @@ def main() -> None:
             continue
 
         if actions[choice]["needs_open"] and not is_open:
-            print("\nСначала откройте или создайте файл (пункт 1).")
+            print("Сначала откройте или создайте файл" "(пункт 1).")
             continue
 
         if choice == "0":
+            if has_changes:
+                save = input("Сохранить перед выходом? (y/n): ")
+                if save == "y":
+                    save_to_file(contacts, filepath)
             print("До свидания!")
             break
         elif choice == "1":
             path = input(f"Путь к файлу [{filepath}]: ").strip()
             if path:
                 filepath = path
-            contacts = open_file(filepath)
+            contacts = load_file(filepath)
             is_open = True  # теперь файл "открыт"
+            has_changes = False
         elif choice == "2":
             path = input(f"Путь к файлу [{filepath}]: ").strip()
             if path:
                 filepath = path
             save_to_file(contacts, filepath)
+            has_changes = False
         elif choice == "3":
             show_all(contacts)
+            has_changes = True
         elif choice == "4":
             add_contact(contacts)
+            has_changes = True
         elif choice == "5":
             search_contacts(contacts)
         elif choice == "6":
             edit_contact(contacts)
+            has_changes = True
         elif choice == "7":
             remove_contact(contacts)
+            has_changes = True
 
 
 if __name__ == "__main__":
