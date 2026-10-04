@@ -6,14 +6,35 @@
 Поддерживается поиск по отдельным полям и по всем полям сразу.
 """
 
-# TODO: сделать детализацию адреса, возможно пригодится на выпускное приложение
-# TODO: пара имя и телефон должна быть уникальна, необходимо исключить дублирование контактов
-# TODO: перед выходом предложить сохранение всех внесённых изменений
-# TODO: заменить os на path
-
 import json
-from os import path
+from pathlib import Path
 from typing import Any
+
+
+def _as_str(val: Any) -> str:
+    """"""
+    if val is None:
+        return ""
+    return str(val)
+
+
+def is_duplicate(
+    contacts: list[dict[str, Any]], name: str, phone: str, skip_id: int | None = None
+) -> bool:
+    """Проверяет, есть ли контакт с такой парой имя+телефон."""
+    name_n = _as_str(name).lower()
+    phone_n = _as_str(phone).lower()
+    for contact in contacts:
+        c_id = contact.get("id")
+        if skip_id is not None:
+            if c_id == skip_id or str(c_id) == str(skip_id):
+                continue
+        if (
+            _as_str(contact.get("name")).lower() == name_n
+            and _as_str(contact.get("phone")).lower() == phone_n
+        ):
+            return True
+    return False
 
 
 def get_next_id(contacts: list[dict[str, Any]]) -> int:
@@ -25,7 +46,7 @@ def get_next_id(contacts: list[dict[str, Any]]) -> int:
 
 def load_file(filepath: str) -> list[dict[str, Any]]:
     """Загружает контакты из JSON-файла."""
-    if not path.exists(filepath):
+    if not Path(filepath).exists():
         print(f"Файл '{filepath}' не найден. " f"Создан пустой справочник.")
         return []
 
@@ -76,6 +97,7 @@ def print_one(contact: dict[str, Any]) -> None:
 
 def add_contact(contacts: list[dict[str, Any]]) -> None:
     """Создаёт новый контакт и добавляет его в список."""
+
     try:
         print("--- Контактная информация ---")
         name = input("Имя: ")
@@ -86,6 +108,10 @@ def add_contact(contacts: list[dict[str, Any]]) -> None:
         comment = input("Комментарий: ")
     except ValueError as exc:
         print(f"Ошибка: {exc}")
+        return
+
+    if is_duplicate(contacts, name, phone):
+        print("Контакт с таким именем и телефоном уже существует.")
         return
 
     contact = {
@@ -114,7 +140,7 @@ def search_contacts(contacts: list[dict[str, Any]]) -> None:
     try:
         choice = input("Выберите режим: ")
         mode = int(choice)
-    except ValueError, TypeError:
+    except (ValueError, TypeError):
         print("Ошибка: нужно ввести число.")
         return
 
@@ -185,7 +211,7 @@ def edit_contact(contacts: list[dict[str, Any]]) -> None:
     try:
         raw_id = input("ID контакта для изменения: ")
         contact_id = int(raw_id)
-    except ValueError, TypeError:
+    except (ValueError, TypeError):
         print("Ошибка: ID должен быть числом.")
         return
 
@@ -197,24 +223,30 @@ def edit_contact(contacts: list[dict[str, Any]]) -> None:
     print("Оставьте поле пустым, чтобы не менять значение.")
 
     try:
-        new_name = input(f"Имя [{contact['name']}]: ").strip()
-        if new_name:
-            contact["name"] = new_name
+        new_name = input(f"Имя [{_as_str(contact.get('name'))}]: ").strip()
+        new_phone = input(f"Телефон [{_as_str(contact.get('phone'))}]: ").strip()
 
-        new_phone = input(f"Телефон [{contact['phone']}]: ").strip()
-        if new_phone:
-            contact["phone"] = new_phone
+        if is_duplicate(contacts, new_name, new_phone):
+            print("Контакт с таким именем и телефоном уже существует.")
+            return
 
-        new_address = input(f"Адрес [{contact['address']}]: ").strip()
-        if new_address:
-            contact["address"] = new_address
-
-        new_comment = input(f"Комментарий [{contact.get('comment', '')}]: ").strip()
-        if new_comment:
-            contact["comment"] = new_comment
+        new_address = input(f"Адрес [{_as_str(contact.get('address'))}]: ").strip()
+        new_comment = input(
+            f"Комментарий [{_as_str(contact.get('comment'))}]: "
+        ).strip()
     except ValueError as exc:
         print(f"Ошибка: {exc}")
         return
+
+    # Применяем изменения только после успешной проверки.
+    if new_name:
+        contact["name"] = new_name
+    if new_phone:
+        contact["phone"] = new_phone
+    if new_address:
+        contact["address"] = new_address
+    if new_comment:
+        contact["comment"] = new_comment
 
     print(f"Контакт ID {contact_id} изменён.")
 
@@ -223,8 +255,10 @@ def find_by_id(
     contacts: list[dict[str, Any]], contact_id: int
 ) -> dict[str, Any] | None:
     """Ищет контакт по ID."""
+    target = str(contact_id)
     for contact in contacts:
-        if contact.get("id") == contact_id:
+        c_id = contact.get("id")
+        if c_id == contact_id or str(c_id) == target:
             return contact
     return None
 
@@ -238,7 +272,7 @@ def remove_contact(contacts: list[dict[str, Any]]) -> None:
     try:
         raw_id = input("ID контакта для удаления: ")
         contact_id = int(raw_id)
-    except ValueError, TypeError:
+    except (ValueError, TypeError):
         print("Ошибка: ID должен быть числом.")
         return
 
